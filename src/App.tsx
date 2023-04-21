@@ -4,8 +4,8 @@ import { Container, Row, Col, Button, Stack } from 'react-bootstrap';
 
 import { useStore } from './hooks/useStore';
 import './App.css'
-import { AUTO_LANGUAGES } from './constants';
-import { ArrowsIcon } from './components/Icons';
+import { AUTO_LANGUAGES, VOICE_FOR_LANGUAGE } from './constants';
+import { ArrowsIcon, ClipboardIcon, SpeakerIcon } from './components/Icons';
 import { LanguageSelector } from './components/LanguageSelector';
 import { SectionType } from './types.d';
 import { TextArea } from './components/TextArea';
@@ -46,6 +46,18 @@ function App() {
 
   }, [fromText, fromLanguage, toLanguage])
 
+  const handleClipboard = () => {
+    navigator.clipboard.writeText(result).catch(() => { });
+  }
+
+  const handleSpeak = () => {
+    const utterance = new SpeechSynthesisUtterance(result);
+    utterance.lang = VOICE_FOR_LANGUAGE[toLanguage];
+    const voice = speechSynthesis.getVoices().find(v => v.name === 'Karen');
+    utterance.voice = voice || null;
+    speechSynthesis.speak(utterance)
+
+  }
 
 
   return (
@@ -82,7 +94,24 @@ function App() {
               value={toLanguage}
               onChange={setToLanguage}
             />
-            <TextArea type={SectionType.To} loading={loading} value={result} onChange={setResult} />
+            <div style={{ position: 'relative' }}>
+              <TextArea type={SectionType.To} loading={loading} value={result} onChange={setResult} />
+              <div style={{ position: 'absolute', left: 0, bottom: 0, display: 'flex' }}>
+                <Button
+                  variant='link'
+                  onClick={handleSpeak}
+                >
+                  <SpeakerIcon />
+                </Button>
+                <Button
+                  variant='link'
+                  onClick={handleClipboard}
+                >
+                  <ClipboardIcon />
+                </Button>
+
+              </div>
+            </div>
 
 
           </Stack>
